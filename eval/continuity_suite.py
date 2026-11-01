@@ -139,17 +139,21 @@ class OnnxGenerator(ChatGenerator):
 
 
 class HFGenerator(ChatGenerator):
-    """Runs the original weights. Useful for debugging, not for final scores."""
+    """Runs PyTorch weights, either the originals or a GPU INT8 copy."""
 
     def __init__(self, model_id, context_tokens, device="auto"):
         import torch
-        from transformers import AutoModelForCausalLM
+        from transformers import AutoConfig, AutoModelForCausalLM
 
         super().__init__(model_id, context_tokens)
         self.torch = torch
         self.device = device
         if device == "auto":
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        if getattr(AutoConfig.from_pretrained(model_id), "quantization_config", None):
+            # INT8 copies from export_gpu_int8.py are placed on the GPU as they load.
+            self.model = AutoModelForCausalLM.from_pretrained(model_id, device_map={"": self.device}).eval()
+            return
         dtype = torch.float32
         if self.device == "cuda":
             # Older GPUs only emulate bf16, which is slow.
@@ -317,7 +321,7 @@ def main():
         "--device",
         choices=["auto", "cpu", "cuda"],
         default="auto",
-        help="Where to run the original weights for debugging when --onnx-file isn't used",
+        help="Where to run PyTorch weights when --onnx-file isn't used",
     )
     args = parser.parse_args()
 
