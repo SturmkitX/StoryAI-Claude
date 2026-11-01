@@ -1,0 +1,23 @@
+.tools-internal/
+.venv/
+.pytest_cache/
+results/
+__pycache__/
+runs/
+.cache/
+
+# Datasets (data/download.py and data/prepare.py recreate these)
+data/raw/
+data/processed/
+
+# Model files, wherever they end up
+*.onnx
+*.onnx.data
+*.onnx_data
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.gguf
+*.tgz

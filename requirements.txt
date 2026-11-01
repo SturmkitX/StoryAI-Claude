@@ -1,0 +1,9 @@
+accelerate>=1.0
+huggingface_hub>=0.30
+numpy>=2.0
+onnx>=1.20
+onnx_ir
+onnxruntime>=1.20
+onnxruntime-genai>=0.18
+pytest>=8.0
+transformers>=5.22,<6
