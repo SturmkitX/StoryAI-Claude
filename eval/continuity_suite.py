@@ -153,6 +153,10 @@ class HFGenerator(ChatGenerator):
         if getattr(AutoConfig.from_pretrained(model_id), "quantization_config", None):
             # INT8 copies from export_gpu_int8.py are placed on the GPU as they load.
             self.model = AutoModelForCausalLM.from_pretrained(model_id, device_map={"": self.device}).eval()
+            # Their layers expect float16 and log a warning per layer for anything else.
+            for parameter in self.model.parameters():
+                if parameter.is_floating_point():
+                    parameter.data = parameter.data.half()
             return
         dtype = torch.float32
         if self.device == "cuda":
